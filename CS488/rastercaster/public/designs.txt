@@ -1,0 +1,99 @@
+#####
+ONE
+#####
+float x = (gl_FragCoord.x / dimensions.x - 0.5) * 2.0;
+float y = (gl_FragCoord.y / dimensions.y - 0.5) * 2.0;
+vec2 position = vec2 (x, y);
+float theta = 0.0 ;
+float r = length (position) ;
+if (position.x != 0.0 && position.y != 0.0){
+  theta = degrees (atan (position.y,position.x));
+}
+float modResult = mod(theta + (30.0 * time) - (120.0 * log (r)), 30.0);
+if (modResult < 15.0){
+  color = vec3 (0.0, 0.0, 0.0);
+} else{
+  color = vec3 (1.0, 1.0, 1.0);           
+}
+#####
+TWO
+#####
+float numIntersections = 0.0;
+float x = (gl_FragCoord.x / dimensions.x - 0.5) * 2.0;
+float y = (gl_FragCoord.y / dimensions.y - 0.5) * 2.0;
+vec2 position = vec2 (x, y);
+float mouseX = (mouse.x / dimensions.x - 0.5) * 2.0;
+float mouseY = 0.0 - (mouse.y / dimensions.y - 0.5) * 2.0;
+vec2 mousePosition = vec2 (mouseX, mouseY);
+vec2 topLeft = vec2 (-1.0, 1.0);
+vec2 topRight = vec2 (1.0, 1.0);
+vec2 bottomLeft = vec2 (-1.0, -1.0);
+vec2 bottomRight = vec2 (1.0, -1.0);
+float centerDistance = distance (position, mousePosition);
+float topLeftDistance = distance (position, topLeft);
+float topRightDistance = distance (position, topRight);
+float bottomLeftDistance = distance (position, bottomLeft);
+float bottomRightDistance = distance (position, bottomRight);
+if (mod (topLeftDistance + 0.1 * time, 0.1) <= 0.05)
+{
+  numIntersections = numIntersections + 1.0;
+}
+if (mod (topRightDistance + 0.1 * time, 0.1) <= 0.05)
+{
+  numIntersections = numIntersections + 1.0;
+}
+if (mod (bottomLeftDistance + 0.1 * time, 0.1) <= 0.05)
+{
+  numIntersections = numIntersections + 1.0;
+}
+if (mod (bottomRightDistance + 0.1 * time, 0.1) <= 0.05)
+{
+  numIntersections = numIntersections + 1.0;
+}
+float colorValue = (1.0 - centerDistance) * numIntersections / 4.0;
+color = vec3 (colorValue, 0 , colorValue);
+#####
+THREE
+#####
+float x = gl_FragCoord.x / dimensions.x;
+float y = (13.0 * (gl_FragCoord.y / dimensions.y));
+vec2 position = vec2 (x, y);
+if (mod (floor (y), 2.0) == 0.0)
+{
+  color = vec3 (1.0, 0.0, 0.0);
+}
+else
+{
+  color = vec3(1.0);
+}
+if (x < 0.5 && y > 6.0)
+{
+  y = 1.0 - (gl_FragCoord.y / dimensions.y);
+  position = vec2 (x, y);
+  color = vec3 (0.0, 0.0, 1.0);
+  vec2 center = vec2(0.25, 0.25);
+  if (distance (position, center) < 0.2 && distance (position, center) > 0.19)
+  {
+    color = vec3 (1.0);
+  }
+}
+#####
+FOUR
+#####
+float x = (gl_FragCoord.x / dimensions.x - 0.5) * 2.0;
+float y = (gl_FragCoord.y / dimensions.y - 0.5) * 2.0;
+color = vec3 (0, tan (1000.0 * y/x), 0);
+#####
+FIVE
+#####
+float x = (gl_FragCoord.x / dimensions.x - 0.5) * 2.0;
+float y = (gl_FragCoord.y / dimensions.y - 0.5) * 2.0;
+if (mod (x, 0.1) < 0.05 && mod (y, 0.1) < 0.05)
+{
+  float val = smoothstep (0.0, 0.02, mod (y, 0.05) + mod (x, 0.05));
+  color = vec3 (sin (val) * tan (val), cos (val) * tan (val), 0.0);
+}
+else
+{
+color = vec3 (x, y, x * y);
+}
