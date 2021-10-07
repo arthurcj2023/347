@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Week 5: JavaScript, Node JS, and Discord</title>
+    <link rel="StyleSheet" href="week5style.css">
+    <script src="index.js"></script>
+</head>
+
+<body>
+    <h2>Week 5: JavaScript, Node JS, and Discord</h2>
+    <br>
+    <p>
+        Learing about Node JS today was a breath of fresh air on how to use javascript for more than just making a page
+        more fucntional. It showed me that whole programs can be made in javascript that can be useful beyond webpage
+        applications. I also leared a lot about the Promise system and how to make ansynchronous code sychronous. Being
+        able to have web requests be performed while the application waits is a powerful tool. I am also enjoying
+        javascript as its more similar to traditional coding that I've done in previous classes and allows me to use
+        those concepts in a web application. 
+    </p>
+    <br>
+    <p>Learing about Node JS today also inspired me to make make a web service for the social media app Discord.
+        Recently the
+        platform has been cracking down on bots that play music that was acquired through illegal means. I took it upon
+        myself to make a discord bot that could play music and that obeys copyright laws on music. The bot can play and
+        search for music from youtube, and then plays it in a voice channel, so you can listen to music while chatting
+        with friends or playing a game. I had great challenges making sure that all of the asychronous http requests and
+        searches that make the bot work all ran in order. I fixed this by placing them into asynchronous functions and
+        then doing await function() to make sure that the functions completed in order so that the bot didn't crash. I
+        can't run a node application from a web browser, so heres the source for the bot here:
+    <pre>
+        <code>
+/*
+
+
+    Imports for utils and constants
+
+
+*/
+const Discord = require('discord.js');
+const fs = require("fs");
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, entersState, VoiceConnectionStatus, NoSubscriberBehavior, StreamType, AudioPlayerStatus } = require('@discordjs/voice');
+const ffmpeg = require('fluent-ffmpeg');
+const ytdl = require('ytdl-core');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const youtubesearchapi = require("youtube-search-api");
+const intents = new Discord.Intents(32767);
+
+
+var playedOne = false;
+var playingSlot = 0;
+var currentSlot = 0;
+var runtimes = [50];
+var titles = [50];
+var connected = false;
+var connection = 0;
+var resource = 0;
+
+const player = createAudioPlayer({
+    behaviors: {
+        noSubscriber: NoSubscriberBehavior.Pause,
+    },
+});
+player.on(AudioPlayerStatus.Idle, async () => {
+    if (currentSlot - 1 > playingSlot && playedOne) {
+        playingSlot++;
+        resource = createAudioResource(`./songs/${playingSlot}.mp3`);
+        await sleep(runtimes[playingSlot] * 10);
+        player.play(resource);
+        await entersState(player, AudioPlayerStatus.Playing, 5e3);
+        connection.subscribe(player);
+        deleteAudioFilesBefore(playingSlot);
+
+    } else {
+        player.stop();
+        playingSlot = 0;
+        currentSlot = 0;
+        runtimes = [50];
+        titles = [50];
+        playedOne = false;
+    }
+});
+async function playSong(path, args) {
+    var resource = 0;
+    if (path.endsWith(".webm") || path.endsWith(".mp3")) {
+        resource = createAudioResource(path, {
+            inputType: StreamType.Arbitrary,
+        });
+    } else if (path.startsWith("https://www.youtube.com/")) {
+        mp3 = `./songs/${currentSlot}.mp3`;
+        ytdl.chooseFormat(await (await ytdl.getInfo(vid.id)).formats, { quality: '18' });
+        stream = ytdl(path);
+        proc = await new ffmpeg({ source: stream });
+        await proc.setFfmpegPath(ffmpegPath);
+        await proc.saveToFile(mp3);
+    } else {
+        vid = await searchForVideo(args);
+        mp3 = `./songs/${currentSlot}.mp3`;
+        ytdl.chooseFormat(await (await ytdl.getInfo(vid.id)).formats, { quality: '18' });
+        stream = ytdl(`https://www.youtube.com/watch?v=${vid.id}`);
+        proc = await new ffmpeg({ source: stream });
+        await proc.setFfmpegPath(ffmpegPath);
+        await proc.saveToFile(mp3);
+    }
+    data = vid.length.simpleText.split(":");
+    seconds = parseInt(data[0]) * 60 + parseInt(data[1]);
+    runtimes[currentSlot++] = Math.min(seconds, 5000);
+    titles[currentSlot - 1] = vid.title;
+    currentSlot %= 50;
+    if (!playedOne) {
+        await sleep(1000);
+        resource = createAudioResource(`./songs/${currentSlot - 1}.mp3`);
+        await sleep(runtimes[currentSlot - 1] * 10);
+        player.play(resource);
+        await entersState(player, AudioPlayerStatus.Playing, 5e3);
+        connection.subscribe(player);
+        playedOne = true;
+    }
+
+
+}
+
+/*
+
+
+Helper methods.
+
+
+*/
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function searchForVideo(term) {
+    gang = await youtubesearchapi.GetListByKeyword(term, [false]);
+    return gang.items[0];
+}
+
+async function deleteAudioFiles() {
+    fs.readdir("./songs", function (err, files) {
+        if (err) {
+
+        }
+
+        files.forEach(async function (file) {
+            await sleep(5000);
+            fs.unlinkSync(`./songs/${file.toString()}`);
+        });
+    });
+}
+
+async function deleteAudioFilesBefore(before) {
+    fs.readdir("./songs", function (err, files) {
+        if (err) {
+
+        }
+        var deleteCount = 0;
+
+        files.forEach(async function (file) {
+            if (++deleteCount < before) {
+                await sleep(5000);
+                fs.unlinkSync(`./songs/${file.toString()}`);
+            }
+        });
+    });
+}
+
+/*
+
+
+Voice channel connect/disconnect code here
+
+
+*/
+
+async function connectToChannel(channel) {
+    if (channel) {
+        connection = joinVoiceChannel({
+            channelId: channel.id,
+            guildId: channel.guild.id,
+            adapterCreator: channel.guild.voiceAdapterCreator
+        })
+        await entersState(connection, VoiceConnectionStatus.Ready, 30e3);
+    }
+}
+
+async function disconnectFromChannel() {
+    connection.destroy();
+}
+
+/*
+
+
+Main class here, handles on launch and on text chat events
+
+
+*/
+
+class Client extends Discord.Client {
+
+    constructor() {
+        super({ intents });
+    }
+
+    start(token) {
+        this.login(token);
+        this.on("ready", async client => {
+            console.log("Obama is online.");
+            client.voice.serverDeaf;
+            deleteAudioFiles();
+        });
+
+        this.on("messageCreate", async message => {
+            let args = message.content.split(" ");
+            switch (args[0]) {
+                case 'j':
+                case 'join':
+                    await connectToChannel(message.member.voice.channel);
+                    connected = true;
+                    break;
+                case 'l':
+                case 'dc':
+                case 'leave':
+                    await disconnectFromChannel();
+                    connected = false;
+                    playingSlot = 0;
+                    currentSlot = 0;
+                    runtimes = [50];
+                    playedOne = false;
+                    break;
+                case 'p':
+                case 'play':
+                    if (!connected) {
+                        await connectToChannel(message.member.voice.channel);
+                        connected = true;
+                    }
+                    if (args[1]) {
+                        await playSong(args[1], args.slice(1, args.length + 1));
+                    }
+                    break;
+                case 'pause':
+                    player.pause();
+                    break;
+                case 'resume':
+                    player.unpause();
+                    break;
+                case 'stop':
+                    player.stop();
+                    playingSlot = 0;
+                    currentSlot = 0;
+                    runtimes = [50];
+                    titles = [50];
+                    playedOne = false;
+                    break;
+                case 's':
+                case 'skip':
+                    if (currentSlot - 1 > playingSlot) {
+                        playingSlot++;
+                        resource = createAudioResource(`./songs/${playingSlot}.mp3`);
+                        await sleep(runtimes[playingSlot] * 10);
+                        player.play(resource);
+                        await entersState(player, AudioPlayerStatus.Playing, 5e3);
+                        connection.subscribe(player);
+                    }
+                    else {
+                        deleteAudioFiles();
+                        player.stop();
+                        playingSlot = 0;
+                        currentSlot = 0;
+                        runtimes = [50];
+                        titles = [50];
+                        playedOne = false;
+                    }
+                    break;
+                case 'q':
+                    var number = 1;
+                    for (var i = playingSlot; i < titles.length; i++) {
+                        if (titles[i]) {
+                            if (titles[i] == 50) continue;
+                            if (i == playingSlot) {
+                                this.channels.cache.get(message.channelId).send(`PLAYING: **${titles[i]}**`);
+                            }
+                            else {
+                                this.channels.cache.get(message.channelId).send(`${number++}) **${titles[i]}**`);
+                            }
+                        }
+                    }
+                    break;
+                case 'c':
+                case 'clear':
+                    player.stop();
+                    playingSlot = 0;
+                    currentSlot = 0;
+                    runtimes = [50];
+                    titles = [50];
+                    playedOne = false;
+                    deleteAudioFiles();
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+}
+
+var client = new Client();
+client.start("{REDACTED}}");
+        </code>
+    </pre>
+    </p>
+    <h4>Sources</h4>
+    <a href="https://discord.com/developers/docs/intro">
+        <p id="source">https://discord.com/developers/docs/intro</p>
+    </a>
+    <a href="https://nodejs.org/en/docs/">
+        <p id="source">
+            https://nodejs.org/en/docs/
+        </p>
+    </a>
+    <a href="index.html" id="back">
+        <- Back</a>
+</body>
+
+</html>
