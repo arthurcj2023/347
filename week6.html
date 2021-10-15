@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Week 6: More node and Web-Services</title>
+    <link rel="StyleSheet" href="week6style.css">
+</head>
+
+<body>
+    <h2>Week 6: More node and Web-Services</h2>
+    <br>
+    <p>
+        Learning about web services this week opened yet another door to new possibilities in the realm of web
+        development. I find it fascinating that you could use http to transfer non html data in order to interact with
+        some form of service. This was cool because I could use it to do many things, and also help with making a
+        network of bot clients that could connect to a host service. I also found it interesting that there was such a
+        simple way to establish a web service on the local host. After doing a lot more boilerplate work in CS 361, the
+        simplicity of the method calls was refreshing to say the least. I hope that in the future, I can make a web
+        service to synchronize some of my perosnal bots that perform daily activities for me.
+    </p>
+    <br>
+    <p>I had so much fun last week that I decided to continue making bots using node, and this week I decided to make a
+        bot the could create a google account and save its details in a file for me. This is the beginning of a much
+        larger project that I hope to continue in the coming weeks. The bot will simple fill out fields for the google
+        sign up and then create the account. It then saves the details in a file so that I can use them in the future.
+        This is entirely for education purposes, so the account will be deleted after its creation to not disturb or
+        waste server space. Here is the code for my google account creator:
+        <pre>
+            <code>
+const {ActionSequence, Builder, By, Key, util} = require("selenium-webdriver");
+
+const usernameCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const passwordCharacters = '!@#$%&'
+
+function generateUsername(length) {
+    let username = '';
+    for (let i = 0; i < length; i++)
+    {
+        username += usernameCharacters.charAt(Math.floor(Math.random() * usernameCharacters.length));
+    }
+    return username;
+}
+
+function generatePassword() {
+    let password = generateUsername(10);
+    password.concat(passwordCharacters.charAt(Math.floor(Math.random() * passwordCharacters.length)));
+    return password;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+
+async function example()
+{
+    let driver = await new Builder().forBrowser("chrome").build();
+    await driver.get("http://google.com");
+    await driver.findElement(By.xpath("//*[text()='Sign in']")).click();
+    await driver.findElement(By.xpath("//*[text()='Create account']")).click();
+    await driver.findElement(By.xpath("//*[text()='For myself']")).click();
+    await driver.findElement(By.name("firstName")).sendKeys("John");
+    await driver.findElement(By.name("lastName")).sendKeys("Smith");
+    let username = generateUsername(20);
+    await driver.findElement(By.name("Username")).sendKeys(username);
+    let password = generatePassword();
+    await driver.findElement(By.name("Passwd")).sendKeys(password);
+    await driver.findElement(By.name("ConfirmPasswd")).sendKeys(password);
+    await driver.actions({bridge : true}).sendKeys(Key.TAB, Key.TAB, Key.RETURN).perform();
+    sleep(2000);
+    await driver.actions({bridge : true}).sendKeys(Key.TAB, Key.TAB, Key.TAB, Key.TAB).perform();
+    await driver.actions({bridge : true}).sendKeys("7037058881").perform();
+    await driver.actions({bridge : true}).sendKeys(Key.TAB, Key.TAB, Key.RETURN).perform();
+}
+example();
+            </code>
+        </pre>
+    </p>
+    <h4>Sources</h4>
+    <a href="https://discord.com/developers/docs/intro">
+        <p id="source">https://discord.com/developers/docs/intro</p>
+    </a>
+    <a href="https://nodejs.org/en/docs/">
+        <p id="source">
+            https://nodejs.org/en/docs/
+        </p>
+    </a>
+    <a href="index.html" id="back">
+        <- Back</a>
+</body>
+
+</html>
