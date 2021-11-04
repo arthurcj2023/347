@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Week 7: Introduction to React and FollowBot Pt.2</title>
+    <link rel="StyleSheet" href="week7style.css">
+</head>
+
+<body>
+    <h2>Week 7: Introduction to React, and FollowBot Pt.2</h2>
+    <br>
+    <p>
+        This week the main focus was finishing the web service and getting a quick introduction to react. I found react 
+        to be very complicated in nature. I felt that there was a lot going on behind the scenes that I didn't fully understand, 
+        which is one my least favorite things about using libraries. I hope to spend some time this weekend learning more about 
+        what React is doing behind the App.jsx file. I did learn about dom and ref elements, and how to create js objects that 
+        could represent a collection of html elements, and dynamically add them to the page. I thought that these things could
+        be done in node without needing react, so I am interested to see what react does that a node library I could build
+        myself wouldn't. What I'm trying to say is that I am currently skeptical about the cost versus efficiency of the react
+        framework, and if there is a future where another library besides angular will replace react making learning the specific
+        framework less important. 
+    </p>
+    <br>
+    <p>
+        In terms of what I did this week for personal learning, I built upon my email account creator and coded an instagram 
+        account creator that can create instagram accounts using the email accounts that can be generated with the email account
+        generator. This is part 2/3 of this project as I will need to set up the instagram bot accounts to follow a specific user
+        and like all of their posts. This was less of a challenge than with google, because google had some of their signup forms
+        set to not be tabbable and have a randomly generated id. With instagram it is a lot simpler because instagram had a static
+        name attribute on all of the input tags, making it easier for me to direct selenium webdriver towards them. As with the last 
+        bot. This bot generator is solely for the experience gained with learning how to gerneate bots, and all bots created during 
+        testing and used will be handled ethically and will be deleted to save server space once testing is over. The code below 
+        creates and verifies an instagram accoun and logs the password to the console. The way to cghange the email is to change
+        the string with {REDACTED} in it ath the bottom of the file.
+        <pre>
+            <code>
+const { Builder, By, Capabilities, Key } = require("selenium-webdriver");
+const chrome = require('selenium-webdriver/chrome');
+
+const usernameCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const passwordCharacters = '!@#$%&'
+
+function generateUsername(length) {
+    let username = '';
+    for (let i = 0; i < length; i++) {
+        username += usernameCharacters.charAt(Math.floor(Math.random() * usernameCharacters.length));
+    }
+    return username;
+}
+
+function generatePassword() {
+    let password = generateUsername(10);
+    password.concat(passwordCharacters.charAt(Math.floor(Math.random() * passwordCharacters.length)));
+    return password;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+async function generateInstagram(email) {
+    let driver = await new Builder().forBrowser("chrome").build();
+    await driver.get("https://www.instagram.com/accounts/emailsignup/");
+    await sleep(2000);
+    await driver.findElement(By.name("emailOrPhone")).sendKeys(email);
+    let firstName = generateUsername(6);
+    let lastName = generateUsername(6);
+    await driver.findElement(By.name("fullName")).sendKeys(firstName + " " + lastName);
+    let username = generateUsername(10);
+    await driver.findElement(By.name("username")).sendKeys(username);
+    let password = generatePassword(10);
+    await driver.findElement(By.name("password")).sendKeys(password);
+    await driver.findElement(By.xpath("//*[text()='Sign up']")).click();
+    await sleep(2000);
+    await driver.actions({ bridge: true }).sendKeys(Key.TAB, Key.TAB, Key.RETURN, Key.UP, Key.UP, Key.UP, Key.RETURN).perform();
+    await sleep(1000);
+    await driver.actions({ bridge: true }).sendKeys(Key.TAB, Key.TAB, Key.TAB, Key.RETURN, Key.UP, Key.UP, Key.RETURN).perform();
+    await driver.actions({ bridge: true }).sendKeys(Key.TAB, Key.TAB, Key.TAB, Key.TAB, Key.RETURN).perform();
+    for (let i = 0; i < 18; i++) {
+        await driver.actions({ bridge: true }).sendKeys(Key.DOWN).perform();
+    }
+    await driver.actions({ bridge: true }).sendKeys(Key.RETURN, Key.TAB, Key.RETURN).perform();
+    driver.close();
+}
+generateInstagram("{REDACTED}}");
+            </code>
+        </pre>
+    </p>
+    <h4>Sources</h4>
+    <a href="https://www.selenium.dev">
+        <p id="source">https://www.selenium.dev</p>
+    </a>
+    <a href="https://reactjs.org/tutorial/tutorial.html">
+        <p id="source">
+            https://reactjs.org/tutorial/tutorial.html
+        </p>
+    </a>
+    <a href="index.html" id="back">
+        <- Back</a>
+</body>
+
+</html>
