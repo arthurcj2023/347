@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Week 8: React States, and Objects</title>
+    <link rel="StyleSheet" href="week8style.css">
+</head>
+
+<body>
+    <h2>Week 8: React States, and Objects</h2>
+    <br>
+    <p>
+        In class this week, we worked on building up our knowledge on React JS. We looked at creating objects that could represent
+        a collection of html elements, and we also looked at state handling and how to edit variables, so that the website can 
+        update with data that can be changed in real time. I found it interesting that a state object is an array of two values,
+        one being like a getter, and the other like a setter. I also learned about how React interprests JSX different from JS.
+        Learning all of this helped me understand the power and versatility of React, which I felt unimpressed by in previous
+        weeks. I like the idea of representing a collection of tags as an object because it makes writing functions more generic
+        for collections of data that follow the same template. I hope that in future weeks we can use some other way to store
+        state variables, maybe a container so that state variables dont have to be individually declared.
+    </p>
+    <br>
+    <p>
+        This week, I took a break from the instagram follow bot. I instead played around with the react api and with the props, and
+        components system. I found it very interesting that you could pass the setter function of the state array into the props of
+        a component and then call that function from inside it. I played around with this, and eventually figured out that I could
+        pass a function into a component. Then I could bind trhe argument of the function to the component itself, and then, whenever
+        the function is called from the component, it will automatically call the function with the same component mapping. 
+    </p>
+        <pre>
+            <code>class ComponentTester extends React.Component {
+                constructor(props) {
+                    super(props);
+                    this.reflexiveFunction = props.reflexiveFunction.bind(this);
+                }
+
+                render() {
+                    return (&lt;p&gt;Test text&lt;/p&gt;)
+                }
+            }
+            </code>
+        </pre>
+    <p>
+        I didn't make any deliverable from this, but I continued to mess around with the limitations of props trying to see if I
+        could get it to do other things, such as modify other components based off of parameters in itself.
+    </p>
+    <h4>Sources</h4>
+    <a href="https://reactjs.org/docs/hooks-state.html">
+        <p id="source">https://reactjs.org/docs/hooks-state.html</p>
+    </a>
+    <a href="https://reactjs.org/docs/components-and-props.html">
+        <p id="source">
+            https://reactjs.org/docs/components-and-props.html
+        </p>
+    </a>
+    <a href="index.html" id="back">
+        <- Back</a>
+</body>
+
+</html>

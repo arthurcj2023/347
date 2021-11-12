@@ -1,0 +1,55 @@
+body {
+    background-color:black;
+    color:#398abf;    
+    font-family: 'Courier New', Courier, monospace;
+}
+
+h1 {
+    font-size: 60px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 40px;
+    text-align: center;
+}
+
+h4 {
+    font-size: 25px;
+    text-align: center;
+}
+
+a {
+    font-size: 40px;
+    padding-left: 15%;
+    text-decoration: none;
+    color:#a36e12;    
+}
+
+p {
+    padding-left: 25%;
+    padding-right: 25%;
+    color:#a36e12;  
+    font-size: 30px;
+}
+
+#source {
+    font-size: 20px;
+    padding-left: 35%;
+    padding-right: 35%;
+    color: #a1d19f;
+}
+
+#back {
+    font-size: 40px;
+    padding-left: 15%;
+    text-decoration: none;
+    color: #a023de;
+}
+
+@media only screen and (max-width:768px) {
+    a {padding-left: 5%; padding-right: 5%;}
+    p {padding-left: 5%; padding-right: 5%;}
+    #source {padding-left: 5%; padding-right: 5%;}
+    #back {padding-left: 5%; padding-right: 5%;}
+}
